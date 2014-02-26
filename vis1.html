@@ -39,6 +39,7 @@ svg {
 	display: block;
 }
 #infobox {
+	visibility: hidden;
 	padding: 5px;
 	margin-top: -10px;
 	position: absolute;
@@ -71,10 +72,10 @@ svg {
 <script>
 	
 	var dataset;
-	d3.json("CW1.json", function (error, json) {
+	d3.csv("CW1.csv", function (error, json) {
 		if (error) return console.warn(error);
 		dataset = json;
-		visualise(dataset.rows);
+		visualise(dataset);
 	});
 	
 	d3.unique = function(array, f) {
