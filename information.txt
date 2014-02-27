@@ -27,3 +27,9 @@ Mouse overs, "Drilling down" to projects, Zooming, Filtering by time, filtering 
 Exceptional
 -----------
 Visualisation 1 shows a total of 4 dimensions concurrently - Time (Project length), Department, Planned Cost, schedule overrun - with extra information in the mouse over. I believe this was quite concise for the data shown.
+
+URLs
+----
+Available at:
+http://bac2.github.io/rich-apps-cw1/menu.html
+http://users.ecs.soton.ac.uk/bac2g10/rich-apps-cw1/menu.html
