@@ -45,7 +45,9 @@ svg {
 	padding: 5px;
 	margin-top: -10px;
 	position: absolute;
-	background-color: #DDD;
+	background-color: #CCD;
+	opacity: 0.9;
+	visibility: hidden;
 }
 
 #infobox span {
@@ -61,15 +63,43 @@ svg {
 <input id="PlannedTime" type="radio" name="1">Sort by Planned Time</input><br/>
 <input id="ActualCost" type="radio" name="1">Sort by Actual Cost</input><br/>
 <input id="StartTime" type="radio" name="1">Sort by Start Date</a><br/>
+<input id="Behind" type="radio" name="1">Sort by Amount Behind Schedule</a><br/>
 <button id="back" disabled>Reset</button>
+
+<div id="vis"></div>
+
+<br/>
+<br/>
+<p>
+This visualisation shows the cost of various parts of the US departments over time. It allows easy comparison of which departments are spending the most, when they started running and whether they are behind schedule or not. Any projects behind schedule are shown are bright red as the page loads. There aren't many that are late so the feature was highlighted. Height of a bar is proportional to the cost, width is the running time. This means area is the cost over time and therefore makes it easy to spot departments which spend a lot of money over short periods of time. <br/>
+The visualisation also shows the same information for each project rather than aggregated by department which can be selected based on a click. <br/>
+As the projects can be viewed against a time scale, it is easy to see where the USA started focussing on various areas. The one which stands out is the US Defense budget which has both run the longest and cost the most consistently.
+</p>
+<p>
+The visualisation is interactive in three ways:
+	<ul>
+	<li>It allows the user to "drill down" into each departments projects separately. There are a lot of these so the y-axis was omitted in favour of the mouseover for clarity.</li>
+	<li>A mouseover shows the relevant information on each project. This includes the cost, start date, expected end date and actual end date, as well as the predicted and actual costs. The mouseover is activated when the mouse is "near" the relevant project.</li>
+	<li>The list can be sorted in real time to show projects of the highest cost, time or by start date.</li>
+	</ul>
+</p>
+<p>
+The visualisation is designed for anyone who wants to see which departments spend the most and then which projects are most behind schedule, or started earliest via any of the other searches. Anyone worried about the current state of US finances, and the plan for the future would find use out of the histogram.
+</P>
+
+This visualisation made use of other work as follows:
+	<ul>
+	<li><a href="http://neuralengr.com/asifr/journals/">Journal publications (for the idea)</a></li>
+	</ul>
+
 <div id="infobox">
 <h3 class="title">Department</h3>
-<strong>Name - </strong><span class="ProjectName">Project Name</span><br/>
-<strong>Start Date - </strong><span class="Start">01/01/1970</span><br/>
-<strong>Planned End Date - </strong><span class="PlannedEnd">02/02/1992</span><br/>
-<strong>Actual End Date: </strong><span class="ActualEnd">03/04/1923</span><br/>
-<strong>Planned Cost - </strong><span class="PlannedCost">$231M</span><br/>
-<strong>Actual Cost - </strong><span class="ActualCost">$2032M</span>
+<strong>Name </strong><span class="ProjectName">Project Name</span><br/>
+<strong>Start Date </strong><span class="Start">01/01/1970</span><br/>
+<strong>Planned End Date </strong><span class="PlannedEnd">02/02/1992</span><br/>
+<strong>Actual End Date </strong><span class="ActualEnd">03/04/1923</span><br/>
+<strong>Planned Cost </strong><span class="PlannedCost">$231M</span><br/>
+<strong>Actual Cost </strong><span class="ActualCost">$2032M</span>
 </div>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
@@ -95,7 +125,7 @@ svg {
 			h = 700,
 			padding = 20,
 			colors = d3.scale.category20c(),
-			svg = d3.select("body")
+			svg = d3.select("#vis")
 					.append("svg")
 					.attr("width", w)
 					.attr("height", h),
@@ -148,6 +178,14 @@ svg {
 			.on("change", function () {
 				sort = function (a, b) {
 					return (a.values['Start Date']) - (b.values['Start Date']);
+				}
+				resort();
+			});
+			
+		d3.select("#Behind")
+			.on("change", function() {
+				sort = function (a, b) {
+					return (b.values['Projected/Actual Completion Date']-b.values['Completion Date']) - (a.values['Projected/Actual Completion Date']-a.values['Completion Date']);
 				}
 				resort();
 			});
@@ -241,8 +279,8 @@ svg {
 			draw(departments, departmentClick, true);
 		}
 		
+		//Shows specific projects under a department
 		departmentClick = function (d) {
-			//Somehow do some crazy things and show projects
 			var filterDataset = dataset.filter(function (d2) { return d2['Agency Name'] == d.key });
 			var projects = d3.nest()
 				.key(function (d2) { return d2['Project Name'] })
@@ -504,5 +542,6 @@ svg {
 	}
 
 </script>
+
 </body>
 </html>
