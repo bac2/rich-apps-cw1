@@ -1,0 +1,29 @@
+Hosting
+-------
+Simply extract the source.zip file (or clone on github) into an empty directory. Open menu.html and select which visualisation you wish.
+
+Errors
+------
+1. Incorrect spelling of similar department names - Aggregated similar names under one heading.
+2. Acronyms instead of full department names (Similar to 1.) - Same as above.
+3. Trailing and leading whitespace in text fields - Stripped all text cells of trailing and leading whitespace.
+4. Cells which were shifted across by a few columns so data did not match up. - Shifted them back.
+5. Aggregate data rows (Totals) - Removed to be calculated as required in the client code.
+6. Dates in wrong format (British/American) - Converted all dates to Date objects. 
+7. Numbers in the wrong format (Commas in the number) - Removed commas to format as numbers.
+8. Cost columns in a text format ("($m)" on the end of some) - Removed extra text, formatted as numbers.
+
+To achieve this, I used a mixture of Google Refine, Microsoft Excel and front-end processing. Where only some required dates existed, I used the most appropriate ones dynamically in the front end.
+
+Audience
+--------
+Detailed on the web pages themselves but mainly any members of the public who wish to determine how the US is spending money, whether the projects are under or over budget and whether they are on or behind schedule.
+
+Interaction
+-----------
+Detailed on the web pages themselves.
+Mouse overs, "Drilling down" to projects, Zooming, Filtering by time, filtering by various sort functions in real time.
+
+Exceptional
+-----------
+Visualisation 1 shows a total of 4 dimensions concurrently - Time (Project length), Department, Planned Cost, schedule overrun - with extra information in the mouse over. I believe this was quite concise for the data shown.
