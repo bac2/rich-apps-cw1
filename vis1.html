@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <style>
-
+body {
+	font-family: sans-serif;
+}
 path {
   stroke: #fff;
   fill-rule: evenodd;
@@ -55,10 +57,11 @@ svg {
 <body>
 <h1 id="heading">Departments and their spending on projects</h1>
 
-<input id="PlannedCost" type="radio" name="1">Sort by Planned Cost</input><br/>
+<input id="PlannedCost" type="radio" checked name="1">Sort by Planned Cost</input><br/>
 <input id="PlannedTime" type="radio" name="1">Sort by Planned Time</input><br/>
 <input id="ActualCost" type="radio" name="1">Sort by Actual Cost</input><br/>
 <input id="StartTime" type="radio" name="1">Sort by Start Date</a><br/>
+<button id="back" disabled>Reset</button>
 <div id="infobox">
 <h3 class="title">Department</h3>
 <strong>Name - </strong><span class="ProjectName">Project Name</span><br/>
@@ -88,7 +91,7 @@ svg {
 			return d['Agency Name'];
 		});
 		
-		var w = 900,
+		var w = 1200,
 			h = 700,
 			padding = 20,
 			colors = d3.scale.category20c(),
@@ -110,6 +113,15 @@ svg {
 			sort,
 			resort,
 			mouseOver;
+		
+		d3.select("#back")
+			.on("click", function() {
+				resetClick();
+			});
+			
+		sort = function (a, b) {
+					return (b.values['Planned Cost ($ M)'] - a.values['Planned Cost ($ M)']);
+				}
 			
 		d3.select("#PlannedCost")
 			.on("change", function () {
@@ -141,8 +153,7 @@ svg {
 			});
 			
 		calculateScales = function(data, nestedData, yValues) {
-			var max_x = d3.max([3,4]);
-			console.log(max_x);
+			console.log(yValues);
 			xScale = d3.time.scale.utc()
 					.domain([
 							d3.min(data, function (d) { return new Date(d['Start Date']); }),
@@ -178,7 +189,7 @@ svg {
 			.rollup( function (d) {
 				var completion_date = d3.max(d, 
 					function (e) {
-						if (e['Planned Project Completion Date (B2)'] == null) {
+						if (!e['Planned Project Completion Date (B2)']) {
 							return new Date(e['Completion Date (B1)']);
 						} else {
 							return new Date(e['Planned Project Completion Date (B2)']); 
@@ -189,7 +200,7 @@ svg {
 							'Completion Date' : completion_date,
 							'Planned Cost ($ M)' : d3.sum(d, function (e) { return e['Planned Cost ($ M)']; }),
 							'Projected/Actual Completion Date': d3.max(d, function (e) { 
-								if (e['Projected/Actual Project Completion Date (B2)'] == null) {
+								if (!e['Projected/Actual Project Completion Date (B2)']) {
 									return completion_date;
 								} else {
 									return new Date(e['Projected/Actual Project Completion Date (B2)']); 
@@ -224,6 +235,8 @@ svg {
 			d3.select("#infobox")
 				.select(".title")
 				.text("US Department");
+			d3.select("#back")
+				.attr("disabled", "");
 			calculateScales(dataset, departments, agenciesArr);
 			draw(departments, departmentClick, true);
 		}
@@ -236,7 +249,7 @@ svg {
 				.rollup(function (d) {
 					var completion_date = d3.max(d, 
 								function (e) {
-									if (e['Planned Project Completion Date (B2)'] == null) {
+									if (!e['Planned Project Completion Date (B2)']) {
 										return new Date(e['Completion Date (B1)']);
 									} else {
 										return new Date(e['Planned Project Completion Date (B2)']); 
@@ -248,7 +261,7 @@ svg {
 								
 							'Planned Cost ($ M)' : d3.sum(d, function (e) { return e['Planned Cost ($ M)']; }),
 							'Projected/Actual Completion Date': d3.max(d, function (e) { 
-								if (e['Projected/Actual Project Completion Date (B2)'] == null) {
+								if (!e['Projected/Actual Project Completion Date (B2)']) {
 									return completion_date;
 								} else {
 									return new Date(e['Projected/Actual Project Completion Date (B2)']); 
@@ -258,11 +271,7 @@ svg {
 						};
 			})
 			.entries(filterDataset);
-				
-			console.log(projects);
-			//Show this in a different view? can be many, many projects
-			//Have to redefine the yScale with new values...
-			//And there might be too many to show, still
+
 			var projectDomain = d3.unique(filterDataset, function (d) { 
 				return d['Project Name'];
 			});
@@ -271,13 +280,14 @@ svg {
 				.text(d.key);
 			d3.select("#infobox")
 				.attr("opacity", 1);
+			d3.select("button")
+				.attr("disabled", null)
 			
 			calculateScales(filterDataset, projects, projectDomain);
-			draw(projects, resetClick, false);
+			draw(projects, function(){}, false);
 			
 		}			
-		
-		
+				
 		mouseOver = function (d) {
 					var box = d3.select("#infobox")
 						.style("visibility", "visible");
@@ -292,17 +302,17 @@ svg {
 					box.select(".PlannedCost")
 						.text("$" + d3.round(d.values['Planned Cost ($ M)']) + " M");
 					box.select(".ActualCost")
-						.text("$"+ d3.round(d.values['Project/Actual Cost ($ M)']) + " M");
+						.text("$"+ d3.round(d.values['Projected/Actual Cost ($ M)']) + " M");
 		}
 		
 		mouseOut = function (d) {
 			d3.select("#infobox")
 				.style("visibility", "hidden");
-		};
-				
+		};		
 
 		draw = function (data, clickFunc, drawAxis) {
-
+			svg.selectAll("g").remove();
+			
 			
 			resort = function () {
 				data.sort( sort );
@@ -333,11 +343,10 @@ svg {
 			}
 
 			resort();
-			svg.selectAll("g").remove();
+		
 			//Create a g for all things
 			var rectGroup = svg.selectAll("g")
 				.data(data)
-				
 				.enter()
 				.append("g")
 				.attr("class", "node");
@@ -349,18 +358,19 @@ svg {
 				.on("mouseover", mouseOver)
 				.on("mousemove", function (d) {
 					return d3.select("#infobox")
-							.style("top", (d3.event(this).pageY-10)+"px")
-							.style("left",(d3.event(this).pageX+10)+"px");
+							.style("top", (d3.event.pageY-10)+"px")
+							.style("left",(d3.event.pageX+10)+"px");
 				})
 				.on("mouseout", mouseOut)
-
 				.attr("x", function (d) {
 					var date = new Date(d.values['Start Date']);
 					return xScale(date);
 				})
 				.attr("y", function (d) {
+				
 					var h = hScale(costWidth(d, predicted));
-					return yScale(d.key) - (h/2);
+					var ySc = yScale(d.key) - (h/2);
+					return ySc;
 				})
 				.attr("width", function (d) {
 					var x = xScale(new Date(d.values['Start Date']));
@@ -381,6 +391,38 @@ svg {
 				.attr("opacity", function (d) {
 					return 0.5;
 				})
+			
+			//Clickable boxes
+			rectGroup
+				.append("rect")
+				.on("click", clickFunc)
+				.on("mouseover", mouseOver)
+				.on("mousemove", function (d) {
+					return d3.select("#infobox")
+							.style("top", (d3.event.pageY-10)+"px")
+							.style("left",(d3.event.pageX+10)+"px");
+				})
+				.on("mouseout", mouseOut)
+				.attr("x", function (d) {
+					return xScale.range()[0];
+				})
+				.attr("y", function (d) {
+					var h = (yScale.range()[yScale.range().length-1] - yScale.range()[0])  / yScale.domain().length;
+					var ySc = yScale(d.key);
+					return ySc - (h/2);
+				})
+				.attr("width", function (d) {
+					return xScale.range()[1] - xScale.range()[0];
+				})
+				.attr("height", function (d) { 
+					return (yScale.range()[yScale.range().length-1] - yScale.range()[0])  / yScale.domain().length + 1;
+				})
+				.attr("fill", function (d) {
+					return colors(yScale(d.key));
+				})
+				.attr("opacity", function (d) {
+					return 0;
+				});
 
 			
 			predicted = true;
@@ -395,15 +437,20 @@ svg {
 				})
 				.on("click", clickFunc)
 				.attr("x", function (d) {
-					var date = new Date(d.values['Start Date']);
+					var date = new Date(d.values['Completion Date']);
 					return xScale(date);
 				})
 				.attr("y", function (d) {
+					console.log(d.key);
 					var h = hScale(costWidth(d, predicted));
+					var ySc = yScale(d.key) - (h/2);
+					if (isNaN(ySc)) {
+						console.log(d);
+					}
 					return yScale(d.key) - (h/2);
 				})
 				.attr("width", function (d) {
-					var x = xScale(new Date(d.values['Start Date']));
+					var x = xScale(new Date(d.values['Completion Date']));
 					var end = xScale(new Date(d.values['Projected/Actual Completion Date']));
 					return end - x;
 				})
@@ -411,10 +458,10 @@ svg {
 					return hScale(costWidth(d, predicted));
 				})
 				.attr("fill", function (d) {
-					return colors(yScale(d.key));
+					return "#FF0000";
 				})
 				.attr("opacity", function (d) {
-					return 0.1;
+					return 1;
 				})
 				.transition()
 				.delay(500)
@@ -453,16 +500,7 @@ svg {
 		};
 		
 		resetClick();
-		
-		d3.selectAll("input")
-			.on("click", function (d) {
-				console.log(d3.select(d3.event.target).attr("value"));
-				if (d3.select(d3.event.target).attr("value") === 'actual') {
-					updateGs(values, false, 'Actual Cost');
-				} else {
-					updateGs(values, false, 'Planned Cost');
-				}
-			});
+
 	}
 
 </script>

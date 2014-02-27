@@ -3,7 +3,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<link rel="stylesheet" href="d3.slider/d3.slider.css" />  
     <style type="text/css">
-
+body {
+	font-family: sans-serif;
+}
 text {
   font-size: 11px;
   pointer-events: none;
@@ -56,7 +58,7 @@ circle.child {
     </style>
   </head>
   <body>
-	<h2>Projected and planned Budget costs in year <span id="year">2012</span></h2>
+	<h2>Projected and planned Budget costs in year <span id="year">2012</span></h2>  
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
     <script type="text/javascript" src="d3.slider/d3.slider.js"></script>
     <script type="text/javascript">
@@ -200,7 +202,7 @@ function filterAndDisplay(dataset, selectedYear) {
 
 d3.csv("CW1.csv", function (dataArray) {
 
-	var selectedYear = 2012;
+	var selectedYear = 2005;
 	slider = d3.slider().axis(true)
 		.min(d3.min(dataArray, function (d) { return new Date(d['Start Date']).getFullYear(); }))
 		.max(d3.max(dataArray, function (d) { return new Date(d['Completion Date (B1)']).getFullYear(); }))
@@ -211,7 +213,7 @@ d3.csv("CW1.csv", function (dataArray) {
 				.text(value);
 			filterAndDisplay(dataArray, value);
 		});
-		
+	d3.select("#year").text(selectedYear);
 	d3.select("#slider").call(slider);
 	filterAndDisplay(dataArray, selectedYear);
 });
