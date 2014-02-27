@@ -3,7 +3,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<link rel="stylesheet" href="d3.slider/d3.slider.css" />  
     <style type="text/css">
-
+body {
+	font-family: sans-serif;
+}
 text {
   font-size: 11px;
   pointer-events: none;
@@ -56,10 +58,47 @@ circle.child {
     </style>
   </head>
   <body>
-	<h2>Projected and planned Budget costs in year <span id="year">2012</span></h2>
-    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
-    <script type="text/javascript" src="d3.slider/d3.slider.js"></script>
-    <script type="text/javascript">
+	<h2>Projected and planned Budget costs in year <span id="year">2012</span></h2> 
+	<div id="vis"></div>
+	
+	<div id="slider"></div>
+	
+	<br/>
+	<br/>
+	<p>
+	This visualisation shows the budgeted amount for each US Department in a way that is comparable to each other. The size of the bubble corresponds to the total cost of projects run by the departments. The colour of the bubble indicated whether the department is under or over budget at a glance. The visualisation shows the information for one year at a time, with years in the future showing predicted project costs rather than actual costs. Each sub-bubble is one project. This can be used to get an indication of whether the entire budget is spent on one project or on many different ones.
+	</p>
+	<p>
+	The visualisation is interactive in three ways:<br/>
+		<ul>
+		<li>It allows zooming to show the smaller departments relative size even when they are dwarfed by larger budgets.</li>
+		<li>The displayed year is adjustable and will show the budget for that particular year.</li>
+		<li>A mouseover of relevant information for each department is shown to allow actual numbers to be discovered.</li>
+		</ul>
+	</p>
+	<p>
+	The intended audience is anyone intending to discover whether the US Departments are staying on budget in each year, particularly politicians. It is also well suited to public scrutiny in light of political spending misuse.
+	</p>
+	<p>
+	This visualisation made use of other work as follows:
+		<ul>
+		<li><a href="http://mbostock.github.io/d3/talk/20111116/pack-hierarchy.html">Pack Hierachy Example</a></li>
+		<li><a href="https://github.com/turban/d3.slider">D3 Slider library</a></li>
+		</ul>
+		
+	
+	<div id="infobox">
+		<h3 class="title">Department</h3>
+		<strong>Name </strong><span class="ProjectName">Project Name</span><br/>
+		<strong>First project commenced </strong><span class="Start">01/01/1970</span><br/>
+		<strong>Number of projects </strong><span class="NumProjects">0</span><br/>
+		<strong>Total Planned Cost </strong><span class="PlannedCost">$231M</span><br/>
+		<strong>Total Actual Cost </strong><span class="ActualCost">$2032M</span><br/>
+		<strong id="budget">Over budget by </strong><span class="Difference">$2032M</span>
+	</div>
+		<script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+		<script type="text/javascript" src="d3.slider/d3.slider.js"></script>
+		<script type="text/javascript">
 
 var w = 1280,
     h = 800,
@@ -83,7 +122,7 @@ var pack = d3.layout.pack()
 	})
     .value(function(d) { return d['Planned Cost ($ M)']; })
 
-var vis = d3.select("body").insert("svg:svg", "h2")
+var vis = d3.select("#vis").insert("svg:svg", "h2")
     .attr("width", w)
     .attr("height", h)
   .append("svg:g")
@@ -200,7 +239,7 @@ function filterAndDisplay(dataset, selectedYear) {
 
 d3.csv("CW1.csv", function (dataArray) {
 
-	var selectedYear = 2012;
+	var selectedYear = 2005;
 	slider = d3.slider().axis(true)
 		.min(d3.min(dataArray, function (d) { return new Date(d['Start Date']).getFullYear(); }))
 		.max(d3.max(dataArray, function (d) { return new Date(d['Completion Date (B1)']).getFullYear(); }))
@@ -211,7 +250,7 @@ d3.csv("CW1.csv", function (dataArray) {
 				.text(value);
 			filterAndDisplay(dataArray, value);
 		});
-		
+	d3.select("#year").text(selectedYear);
 	d3.select("#slider").call(slider);
 	filterAndDisplay(dataArray, selectedYear);
 });
@@ -284,15 +323,5 @@ function zoom(d, i) {
 
     </script>
 
-	<div id="slider"></div>
 	
-<div id="infobox">
-<h3 class="title">Department</h3>
-<strong>Name </strong><span class="ProjectName">Project Name</span><br/>
-<strong>First project commenced </strong><span class="Start">01/01/1970</span><br/>
-<strong>Number of projects </strong><span class="NumProjects">0</span><br/>
-<strong>Total Planned Cost </strong><span class="PlannedCost">$231M</span><br/>
-<strong>Total Actual Cost </strong><span class="ActualCost">$2032M</span><br/>
-<strong id="budget">Over budget by </strong><span class="Difference">$2032M</span>
-</div>
 </body></html>
